@@ -216,6 +216,13 @@ contract collateralizeGLP {
         return interest;
     }
 
+    function getTokenAccruedInterest(address token) public view returns (uint256) { // 1e18 precision
+        uint secondsBorrowed = block.timestamp.sub(interestCheckpoint[token]);
+        uint totalBorrowed = totalBorrowedAmount(token).add(tokenAccruedInterest[token]);
+        uint interest = totalBorrowed.mul(secondsBorrowed).div(31536000); // 31536000 seconds in a year
+        return interest;
+    }
+
     function totalBorrowedAmount(address token) private view returns (uint256) {
         return borrowTokenBalance[token].sub(IERC20(token).balanceOf(address(this)));
     }
