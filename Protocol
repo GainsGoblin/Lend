@@ -26,17 +26,35 @@ interface IVault {
     function allWhitelistedTokens(uint) external view returns (address);
 }
 
+interface IRewardTracker {
+    function depositBalances(address _account, address _depositToken) external view returns (uint256);
+    function stakedAmounts(address _account) external view returns (uint256);
+    function updateRewards() external;
+    function stake(address _depositToken, uint256 _amount) external;
+    function stakeForAccount(address _fundingAccount, address _account, address _depositToken, uint256 _amount) external;
+    function unstake(address _depositToken, uint256 _amount) external;
+    function unstakeForAccount(address _account, address _depositToken, uint256 _amount, address _receiver) external;
+    function tokensPerInterval() external view returns (uint256);
+    function claim(address _receiver) external returns (uint256);
+    function claimForAccount(address _account, address _receiver) external returns (uint256);
+    function claimable(address _account) external view returns (uint256);
+    function averageStakedAmounts(address _account) external view returns (uint256);
+    function cumulativeRewards(address _account) external view returns (uint256);
+}
+
 contract collateralizeGLP {
     
     using SafeMath for uint;
 
     mapping(address => bool) public borrowToken; // Token allowed to be deposited/borrowed
     mapping(address => address) public priceFeed; // Price feed for token
-    mapping(address => address) public borrowShare; // Share token from deposited token
-    mapping(address => uint) public borrowTokenBalance; // Tracks balance of deposited tokens
+    mapping(address => address) public borrowShare; // Share token from lent token
+    mapping(address => uint) public borrowTokenBalance; // Tracks balance of lent tokens
 
     mapping(address => address) public collateralTokenPriceFeed; // Price feed for tokens
-    mapping(address => uint) public collateralAmount; // User deposited collateral
+    mapping(address => mapping(address => uint)) public borrowedAmount; // User borrowed amount without interest
+    mapping(address => uint) public tokenAccruedInterest; // Total accrued interest on each token
+    mapping(address => uint) public interestCheckpoint; // Tracks accrued interest using time
 
     uint256 public totalCollateral; // Total GLP deposited
 
@@ -54,18 +72,23 @@ contract collateralizeGLP {
 
     // End user functions
 
-    function depositCollateral(uint256 amount) external {  
+    function depositCollateral(uint256 amount) external {
         uint amountToMint = amount.mul(10**18).div(getCollateralShareValue());
         IERC20(GLP).transferFrom(msg.sender, address(this), amount);
         IERC20(GLPShare).mint(msg.sender, amountToMint);
-        collateralAmount[msg.sender] += amount;
+        totalCollateral += amount;
     }
 
-    function withdrawCollateral(uint256 shareAmount) external {
+    function withdrawCollateralAll() external {
+        uint shareAmount = IERC20(GLPShare).balanceOf(msg.sender);
+        withdrawCollateral(shareAmount);
+    }
+
+    function withdrawCollateral(uint256 shareAmount) public {
         IERC20(GLP).burn(msg.sender, shareAmount);
         uint amount = shareAmount.mul(getCollateralShareValue()).div(10**18);
-        collateralAmount[msg.sender] -= amount;
         IERC20(GLP).transfer(msg.sender, amount);
+        totalCollateral -= amount;
     }
 
     function lend(address token, uint256 amount) external {
@@ -77,8 +100,8 @@ contract collateralizeGLP {
     }
 
     function withdrawAll(address token) external {
-        uint amount = IERC20(borrowShare[token]).balanceOf(msg.sender).mul(getShareValue(token)).div(10**18);
-        withdraw(token, amount);
+        uint shareAmount = IERC20(borrowShare[token]).balanceOf(msg.sender);
+        withdraw(token, shareAmount);
     }
 
     function withdraw(address token, uint256 shareAmount) public {
@@ -89,16 +112,20 @@ contract collateralizeGLP {
         IERC20(token).transfer(msg.sender, amountToSend);
     }
 
-    function borrow() external {
-
+    function borrow(address token, uint256 tokenAmount) external {
+        require(borrowingPower(msg.sender, token) >= tokenAmount, "Not enough borrowing power");
+        borrowedAmount[msg.sender][token] += tokenAmount;
+        IERC20(token).transfer(msg.sender, tokenAmount);
     }
 
-    function repay() external {
-
+    function repay(address token, uint256 tokenAmount) public {
+        require(tokenAmount <= borrowedAmount[msg.sender][token], "Repaying too much");
+        IERC20(token).transferFrom(msg.sender, address(this), tokenAmount);
+        borrowedAmount[msg.sender][token] -= tokenAmount;
     }
 
-    function repayAll() external {
-
+    function repayAll(address token) external {
+        repay(token, borrowedAmount[msg.sender][token]);
     }
 
     // Governance functions
@@ -144,24 +171,57 @@ contract collateralizeGLP {
 
     function getLatestPrice(address token) public view returns (uint) {
         (
-            , 
+            ,
             int price,
             ,
             ,
         ) = AggregatorV3Interface(priceFeed[token]).latestRoundData();
-        return uint(price);
+        return uint(price).mul(10**10);
     }
 
-    function getCollateralPrice() public view returns (uint) {
+    function getCollateralPrice() public view returns (uint) { // 1e18 precision
         uint totalValue;
         for (uint i=0; i<vault.allWhitelistedTokensLength(); i++) {
-            totalValue += getLatestPrice(vault.allWhitelistedTokens(i));
+            totalValue += getLatestPrice(vault.allWhitelistedTokens(i)).mul(IERC20(vault.allWhitelistedTokens(i)).balanceOf(address(vault)));
         }
-        uint price = totalValue * 10**8 / (IERC20(GLP).totalSupply())/10**10; // 1e8 precision
+        uint price = totalValue.mul(10**18).div(IERC20(GLP).totalSupply());
         return uint(price);
     }
 
-    function accountHealth(address account) public view returns (uint256) {
-        
+    function accountHealth(address account) public view returns (uint256) { // 1e18 precision
+        return accountCollateralValue(account).mul(10**18).div(accountBorrowedValue(account));
+    }
+
+    function accountBorrowedValue(address account) public view returns (uint256) { // 1e18 precision
+        uint totalBorrowedValue;
+        for (uint i=0; i<vault.allWhitelistedTokensLength(); i++) {
+            totalBorrowedValue += borrowedAmount[account][vault.allWhitelistedTokens(i)].mul(getLatestPrice(vault.allWhitelistedTokens(i)));
+        }  
+        return totalBorrowedValue;      
+    }
+
+    function accountCollateralValue(address account) public view returns (uint256) { // 1e18 precision
+        uint totalCollateralValue = IERC20(GLPShare).balanceOf(account).mul(getCollateralShareValue()).mul(getCollateralPrice()).mul(8).div(10);
+        return totalCollateralValue;    
+    }
+
+    function interestRate(address token) public view returns (uint256) { // 1e18 precision, %annual
+        return totalBorrowedAmount(token).mul(10**18).div(borrowTokenBalance[token]);
+    }
+
+    function userAccruedInterest(address account, address token) public view returns (uint256) { // 1e18 precision
+        uint secondsBorrowed = block.timestamp.sub(interestCheckpoint[token]);
+        uint userBorrowedAmount = borrowedAmount[account][token].add(tokenAccruedInterest[token].mul(borrowedAmount[account][token].div(totalBorrowedAmount(token))));
+        uint interest = userBorrowedAmount.mul(secondsBorrowed).div(31536000); // 31536000 seconds in a year
+        return interest;
+    }
+
+    function totalBorrowedAmount(address token) private view returns (uint256) {
+        return borrowTokenBalance[token].sub(IERC20(token).balanceOf(address(this)));
+    }
+
+    // How many tokens can be borrowed
+    function borrowingPower(address account, address token) public view returns (uint256) {
+        return accountBorrowedValue(account).mul(accountHealth(account)).div(getLatestPrice(token));
     }
 }
