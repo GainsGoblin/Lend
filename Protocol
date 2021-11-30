@@ -83,7 +83,7 @@ contract collateralizeGLP {
     }
 
     function withdrawCollateralAll() external {
-        require(accountBorrowedValue(msg.sender) == 0, "Too much debt");
+        require(accountBorrowedValue(msg.sender) == 0, "Account has debt");
         uint shareAmount = IERC20(GLPShare).balanceOf(msg.sender);
         withdrawCollateral(shareAmount);
     }
@@ -99,6 +99,8 @@ contract collateralizeGLP {
     function lend(address token, uint256 amount) external {
         require(borrowToken[token] == true, "Token not allowed");
         uint amountToMint = amount.mul(10**18).div(getShareValue(token));
+        tokenDebt[token] += getTokenAccruedInterest(token);
+        interestCheckpoint[token] = block.timestamp;
         IERC20(token).transferFrom(msg.sender, address(this), amount);
         IERC20(borrowShare[token]).mint(msg.sender, amountToMint);
         borrowTokenBalance[token] += amount;
@@ -114,6 +116,8 @@ contract collateralizeGLP {
         require(amountToSend > IERC20(token).balanceOf(address(this)), "Too much borrowed from liquidity to withdraw");
         IERC20(borrowShare[token]).burn(msg.sender, shareAmount);
         borrowTokenBalance[token] -= amountToSend;
+        tokenDebt[token] += getTokenAccruedInterest(token);
+        interestCheckpoint[token] = block.timestamp;        
         IERC20(token).transfer(msg.sender, amountToSend);
     }
 
@@ -121,7 +125,7 @@ contract collateralizeGLP {
         require(borrowingPower(msg.sender, token) >= tokenAmount, "Not enough borrowing power");
         tokenDebt[token] += getTokenAccruedInterest(token);
         interestCheckpoint[token] = block.timestamp;
-        tokenDebt[token] += tokenAmount;        
+        tokenDebt[token] += tokenAmount; 
         borrowedAmount[msg.sender][token] += tokenAmount.mul(10**18).div(debtValue(token));
         IERC20(token).transfer(msg.sender, tokenAmount);
     }
