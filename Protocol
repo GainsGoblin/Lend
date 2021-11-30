@@ -64,12 +64,14 @@ contract collateralizeGLP {
     address public GLP;
     address public fGLP;
     address public fsGLP;
-    uint public ltv = 80; // 80 is 80% GLP LTV
+    uint public ltv = 60; // 100 is 100% GLP LTV
 
     constructor(address _vault) {
         governance = msg.sender;
         vault = IVault(_vault);
     }
+
+
 
     // End user functions
 
@@ -81,6 +83,7 @@ contract collateralizeGLP {
     }
 
     function withdrawCollateralAll() external {
+        require(accountBorrowedValue(msg.sender) == 0, "Too much debt");
         uint shareAmount = IERC20(GLPShare).balanceOf(msg.sender);
         withdrawCollateral(shareAmount);
     }
@@ -90,6 +93,7 @@ contract collateralizeGLP {
         uint amount = shareAmount.mul(getCollateralShareValue()).div(10**18);
         IERC20(GLP).transfer(msg.sender, amount);
         totalCollateral -= amount;
+        require(accountHealth(msg.sender) >= 10**18, "Account not healthy after withdraw");
     }
 
     function lend(address token, uint256 amount) external {
@@ -107,7 +111,7 @@ contract collateralizeGLP {
 
     function withdraw(address token, uint256 shareAmount) public {
         uint amountToSend = shareAmount.mul(getShareValue(token)).div(10**18);
-        require(amountToSend > IERC20(token).balanceOf(address(this)), "Too much borrowed from treasury to withdraw");
+        require(amountToSend > IERC20(token).balanceOf(address(this)), "Too much borrowed from liquidity to withdraw");
         IERC20(borrowShare[token]).burn(msg.sender, shareAmount);
         borrowTokenBalance[token] -= amountToSend;
         IERC20(token).transfer(msg.sender, amountToSend);
@@ -115,14 +119,20 @@ contract collateralizeGLP {
 
     function borrow(address token, uint256 tokenAmount) external {
         require(borrowingPower(msg.sender, token) >= tokenAmount, "Not enough borrowing power");
+        tokenDebt[token] += getTokenAccruedInterest(token);
+        interestCheckpoint[token] = block.timestamp;
+        tokenDebt[token] += tokenAmount;        
         borrowedAmount[msg.sender][token] += tokenAmount.mul(10**18).div(debtValue(token));
         IERC20(token).transfer(msg.sender, tokenAmount);
     }
 
     function repay(address token, uint256 tokenAmount) public {
-        require(tokenAmount <= userDebt(msg.sender, token), "Repaying too much");
-        IERC20(token).transferFrom(msg.sender, address(this), tokenAmount);
+        require(tokenAmount <= userDebt(msg.sender, token), "Repaying too much");      
         borrowedAmount[msg.sender][token] -= tokenAmount.mul(10**18).div(debtValue(token));
+        tokenDebt[token] += getTokenAccruedInterest(token);
+        interestCheckpoint[token] = block.timestamp;
+        tokenDebt[token] -= tokenAmount;
+        IERC20(token).transferFrom(msg.sender, address(this), tokenAmount);
     }
 
     function repayAll(address token) external {
@@ -179,7 +189,7 @@ contract collateralizeGLP {
 
     // How many tokens does an user owe
     function userDebt(address account, address token) public view returns (uint256) {
-        return borrowedAmount[account][token].mul(debtValue(token));
+        return borrowedAmount[account][token].mul(debtValue(token)).div(10**18);
     }
 
     // How many lent tokens is it's share token backed by
