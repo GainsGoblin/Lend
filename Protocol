@@ -205,6 +205,11 @@ contract collateralizeGLP {
         return borrowedAmount[account][token].mul(debtValue(token)).div(10**18);
     }
 
+    // How much USD does an user owe per token
+    function userDebtUSD(address account, address token) public view returns (uint256) {
+        return userDebt(account, token).mul(getLatestPrice(token)).div(10**18);
+    }
+
     // How many lent tokens is it's share token backed by
     function getShareValue(address token) public view returns (uint256) {
         if (IERC20(borrowShare[token]).totalSupply() == 0) return 10**18;
