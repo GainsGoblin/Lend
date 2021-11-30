@@ -120,14 +120,16 @@ contract collateralizeGLP {
     }
 
     function repay(address token, uint256 tokenAmount) public {
-        require(tokenAmount <= borrowedAmount[msg.sender][token].mul(debtValue(token)).div(10**18), "Repaying too much");
+        require(tokenAmount <= userDebt(msg.sender, token), "Repaying too much");
         IERC20(token).transferFrom(msg.sender, address(this), tokenAmount);
         borrowedAmount[msg.sender][token] -= tokenAmount.mul(10**18).div(debtValue(token));
     }
 
     function repayAll(address token) external {
-        repay(token, borrowedAmount[msg.sender][token].mul(debtValue(token)).div(10**18));
+        repay(token, userDebt(msg.sender, token));
     }
+
+
 
     // Governance functions
 
@@ -159,33 +161,41 @@ contract collateralizeGLP {
         ltv = _ltv;
     }
 
+
+
     // View functions
 
+    // Value of a debt "token"
     function debtValue(address token) public view returns (uint256) { // 1e18 precision
         return (tokenDebt[token].add(getTokenAccruedInterest(token))).mul(10**18).div(totalBorrowedAmount(token));
     }
 
+    // Interest on token since last checkpoint
     function getTokenAccruedInterest(address token) public view returns (uint256) { // 1e18 precision
         uint secondsBorrowed = block.timestamp.sub(interestCheckpoint[token]);
         uint interest = tokenDebt[token].mul(secondsBorrowed).div(31536000); // 31536000 seconds in a year
         return interest;
     }
 
+    // How many tokens does an user owe
     function userDebt(address account, address token) public view returns (uint256) {
         return borrowedAmount[account][token].mul(debtValue(token));
     }
 
+    // How many lent tokens is it's share token backed by
     function getShareValue(address token) public view returns (uint256) {
         if (IERC20(borrowShare[token]).totalSupply() == 0) return 10**18;
         return borrowTokenBalance[token].mul(10**18).div(IERC20(borrowShare[token]).totalSupply());
     }
 
-    function getCollateralShareValue() public view returns(uint256) {
+    // How many collateral tokens is it's share token backed by
+    function getCollateralShareValue() public view returns(uint256) { // 1e18 precision
         if (IERC20(GLPShare).totalSupply() == 0) return 10**18;
         return totalCollateral.mul(10**18).div(IERC20(GLPShare).totalSupply());
     }
 
-    function getLatestPrice(address token) public view returns (uint) {
+    // Fetch the price of an asset from Chainlink oracle
+    function getLatestPrice(address token) private view returns (uint) {
         (
             ,
             int price,
@@ -195,6 +205,7 @@ contract collateralizeGLP {
         return uint(price).mul(10**10); // Normalize to 1e18
     }
 
+    // Price of GLP
     function getCollateralPrice() public view returns (uint) { // 1e18 precision
         uint totalValue;
         for (uint i=0; i<vault.allWhitelistedTokensLength(); i++) {
@@ -204,33 +215,43 @@ contract collateralizeGLP {
         return uint(price);
     }
 
+    // User's health factor
     function accountHealth(address account) public view returns (uint256) { // 1e18 precision
         return accountCollateralValue(account).mul(10**18).div(accountBorrowedValue(account));
     }
 
+    // How much an user has borrowed in total in USD
     function accountBorrowedValue(address account) public view returns (uint256) { // 1e18 precision
         uint totalBorrowedValue;
         for (uint i=0; i<vault.allWhitelistedTokensLength(); i++) {
-            totalBorrowedValue += borrowedAmount[account][vault.allWhitelistedTokens(i)].mul(getLatestPrice(vault.allWhitelistedTokens(i)));
+            totalBorrowedValue += userDebt(account, vault.allWhitelistedTokens(i)).mul(getLatestPrice(vault.allWhitelistedTokens(i))).div(10**18);
         }  
         return totalBorrowedValue;      
     }
 
+    // Value of an user's collateral in USD
     function accountCollateralValue(address account) public view returns (uint256) { // 1e18 precision
         uint totalCollateralValue = IERC20(GLPShare).balanceOf(account).mul(getCollateralShareValue()).mul(getCollateralPrice()).mul(ltv).div(100);
         return totalCollateralValue;    
     }
 
+    // Annual interest rate of borrowing a token
     function interestRate(address token) public view returns (uint256) { // 1e18 precision, %annual
         return totalBorrowedAmount(token).mul(10**18).div(borrowTokenBalance[token]);
     }
 
+    // How many tokens have been borrowed from liquidity
     function totalBorrowedAmount(address token) private view returns (uint256) {
         return borrowTokenBalance[token].sub(IERC20(token).balanceOf(address(this)));
     }
 
-    // How many tokens can be borrowed
+    // How many tokens can an user borrow
     function borrowingPower(address account, address token) public view returns (uint256) {
         return accountBorrowedValue(account).mul(accountHealth(account)).div(getLatestPrice(token));
+    }
+
+    // How much can an user borrow in USD
+    function borrowingPowerUSD(address account) public view returns (uint256) {
+        return accountBorrowedValue(account).mul(accountHealth(account)).div(10**18);
     }
 }
