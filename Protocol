@@ -69,7 +69,7 @@ contract collateralizeGLP {
     address public GLP;
     address public fGLP;
     address public fsGLP;
-    uint public ltv = 60; // 100 is 100% GLP LTV
+    uint public ltv = 50; // 100 is 100% GLP LTV
     address public stakeReward;
 
     constructor(address _vault, address _rewardsRouter) {
@@ -153,9 +153,11 @@ contract collateralizeGLP {
     function liquidate(address account) external {
         require(accountHealth(account) < 1e18, "Account healthy");
         uint256 usdLoansTotal = accountBorrowedValue(account);
+        uint256 amount;
+        address token;
         for (uint i=0; i<vault.allWhitelistedTokensLength(); i++) {
-            address token = vault.allWhitelistedTokens(i);
-            uint256 amount = rewardsRouter.unstakeAndRedeemGlp(
+            token = vault.allWhitelistedTokens(i);
+            amount = rewardsRouter.unstakeAndRedeemGlp(
                 token,
                 GLPShare.balanceOf(account).mul(getCollateralShareValue().div(1e18)).mul(userDebtUSD(account, token)).div(usdLoansTotal),
                 1,
