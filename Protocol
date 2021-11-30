@@ -143,6 +143,15 @@ contract collateralizeGLP {
         repay(token, userDebt(msg.sender, token));
     }
 
+    function liquidate(address account) external {
+        require(accountHealth(account) < 10**18, "Account healthy");
+        uint256[] memory usdLoansPerAsset = new uint256[](vault.allWhitelistedTokensLength());
+        uint256 usdLoansTotal = accountBorrowedValue(account);
+        for (uint i=0; i<vault.allWhitelistedTokensLength(); i++) {
+
+        }
+    }
+
 
 
     // Governance functions
