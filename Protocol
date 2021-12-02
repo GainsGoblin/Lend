@@ -53,14 +53,16 @@ contract collateralizeGLP {
     IRewardsRouter public rewardsRouter;
     IERC20 public GLPShare;
     IERC20 public GLP;
+    address public weth;
     uint public ltv = 50; // 50 is 50% GLP LTV
     address public stakeReward;
 
-    constructor(address _vault, address _rewardsRouter, address _GLP) {
+    constructor(address _vault, address _rewardsRouter, address _GLP, address _weth) {
         governance = msg.sender;
         rewardsRouter = IRewardsRouter(_rewardsRouter);
         vault = IVault(_vault);
         GLP = IERC20(_GLP);
+        weth = _weth;
     }
 
 
@@ -85,7 +87,7 @@ contract collateralizeGLP {
     function withdrawCollateral(uint256 shareAmount) public returns (uint256) {
         IERC20(GLPShare).burn(msg.sender, shareAmount);
         uint amount = shareAmount.mul(getCollateralShareValue()).div(1e18);
-        uint amountWithdrawn = rewardsRouter.unstakeAndRedeemGlp(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1, amount, 1, msg.sender);
+        uint amountWithdrawn = rewardsRouter.unstakeAndRedeemGlp(weth, amount, 1, msg.sender);
         totalCollateral -= amount;
         require(accountHealth(msg.sender) >= 1e18, "Account not healthy after withdraw");
         return amountWithdrawn;
