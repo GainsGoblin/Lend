@@ -41,7 +41,6 @@ contract collateralizeGLP {
     mapping(address => address) public borrowShare; // Share token from lent token
     mapping(address => uint) public borrowTokenBalance; // Tracks balance of lent tokens
 
-    mapping(address => address) public collateralTokenPriceFeed; // Price feed for tokens
     mapping(address => uint) public decimalMultiplier; // Decimals needed to normalize to 1e18
     mapping(address => uint) public tokenDebt; // Tracks amount of tokens owed
     mapping(address => mapping(address => uint)) public borrowedAmount; // User debt
@@ -54,7 +53,6 @@ contract collateralizeGLP {
     IRewardsRouter public rewardsRouter;
     IERC20 public GLPShare;
     IERC20 public GLP;
-    IERC20 public fsGLP;
     uint public ltv = 50; // 50 is 50% GLP LTV
     address public stakeReward;
 
@@ -69,7 +67,7 @@ contract collateralizeGLP {
 
     // End user functions
 
-    // If user has fsGLP, it should be redeemed beforehand through a tx on frontend
+    // If the user has fsGLP, it should be redeemed beforehand through a tx on frontend
     function depositCollateral(address token, uint256 amount) external {
         IERC20(token).transferFrom(msg.sender, address(this), amount);
         amount = rewardsRouter.mintAndStakeGlp(token, amount, 1, 1);
@@ -202,9 +200,9 @@ contract collateralizeGLP {
         borrowToken[token] = allowed;
     }
 
-    function setCollateralTokenFeed(address token, address feed) external {
+    function setPriceFeed(address token, address feed) external {
         require(msg.sender == governance, "!Governance");
-        collateralTokenPriceFeed[token] = feed;
+        priceFeed[token] = feed;
     }
 
     function setltv(uint _ltv) external {
