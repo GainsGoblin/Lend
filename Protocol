@@ -206,8 +206,8 @@ contract collateralizeGLP {
     function compound() internal {
         uint wethBefore = IERC20(weth).balanceOf(address(this));
         rewardsRouter.handleRewards(
-            true,
-            true,
+            false,
+            false,
             true,
             true,
             true,
