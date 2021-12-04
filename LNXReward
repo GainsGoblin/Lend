@@ -81,7 +81,7 @@ contract LNXRewards {
 
     IERC20 public lnx; // Governance token
     uint256 public mintCheckpoint;
-    uint256 public baseRate = 1e18; // Tokens per second
+    uint256 public baseRate; // Xe18 Tokens per second
     IProtocol public protocol; // Lending protocol
     address public governance;
     mapping(address => uint) public userClaimed; // How many tokens has an user claimed
@@ -91,7 +91,14 @@ contract LNXRewards {
         governance = msg.sender;
     }
 
+    function startRewards() external {
+        require(msg.sender == governance && baseRate == 0);
+        mintRewards();
+        baseRate = 1e18;
+    }
+
     function setProtocol(address _protocol) external {
+        require(msg.sender == governance);
         protocol = IProtocol(_protocol);
     }
 
