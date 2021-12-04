@@ -5,21 +5,23 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/7d17acfb2f12
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/7d17acfb2f12be0a2ad4c08ad4a3d823704b68d6/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/7d17acfb2f12be0a2ad4c08ad4a3d823704b68d6/contracts/utils/Context.sol";
 
-contract ShareToken is Context, IERC20, IERC20Metadata {
+contract LNXToken is Context, IERC20, IERC20Metadata {
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
 
-    address public protocol;
+    address public rewards;
     uint256 private _totalSupply;
     uint256 public capSupply = 1000000e18;
 
-    string private _name;
-    string private _symbol;
+    string private _name = "LNX Token";
+    string private _symbol = "LNX";
 
-    constructor(string memory name_, string memory symbol_) {
+    constructor(address _rewards) {
         _name = name_;
         _symbol = symbol_;
+        rewards = _rewards;
+        _mint(msg.sender, 100000e18);
     }
 
     function name() public view virtual override returns (string memory) {
