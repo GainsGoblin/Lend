@@ -30,10 +30,23 @@ interface IVault {
 interface IRewardsRouter {
     function unstakeAndRedeemGlp(address _tokenOut, uint256 _glpAmount, uint256 _minOut, address _receiver) external returns (uint256);
     function mintAndStakeGlp(address _token, uint256 _amount, uint256 _minUsdg, uint256 _minGlp) external returns (uint256);
+    function handleRewards(
+        bool _shouldClaimGmx,
+        bool _shouldStakeGmx,
+        bool _shouldClaimEsGmx,
+        bool _shouldStakeEsGmx,
+        bool _shouldStakeMultiplierPoints,
+        bool _shouldClaimWeth,
+        bool _shouldConvertWethToEth
+    ) external;
 }
 
 interface ILNXReward {
     function claimRewards(address account) external;
+}
+
+interface IStakeReward {
+    function receiveRewards(address token, uint amount) external;
 }
 
 contract collateralizeGLP {
@@ -62,12 +75,14 @@ contract collateralizeGLP {
     address public lnxReward;
     address public stakeReward;
 
-    constructor(address _vault, address _rewardsRouter, address _GLP, address _weth) {
+    constructor(address _vault, address _rewardsRouter, address _GLP, address _weth, address _lnxReward, address _stakeReward) {
         governance = msg.sender;
         rewardsRouter = IRewardsRouter(_rewardsRouter);
         vault = IVault(_vault);
         GLP = IERC20(_GLP);
         weth = _weth;
+        lnxReward = _lnxReward;
+        stakeReward = _stakeReward;
     }
 
 
@@ -76,6 +91,7 @@ contract collateralizeGLP {
 
     // If the user has fsGLP, it should be redeemed beforehand through a tx on frontend
     function depositCollateral(address token, uint256 amount) external {
+        compound();
         IERC20(token).transferFrom(msg.sender, address(this), amount);
         amount = rewardsRouter.mintAndStakeGlp(token, amount, 1, 1);
         uint amountToMint = amount.mul(1e18).div(getCollateralShareValue());
@@ -152,8 +168,9 @@ contract collateralizeGLP {
         interestCheckpoint[token] = block.timestamp;
         tokenDebt[token] -= tokenAmount.mul(10**decimalMultiplier[token]);
         IERC20(token).transferFrom(msg.sender, address(this), tokenAmount);
-        IERC20(token).transfer(stakeReward, interestPaid.div(4));
+        IStakeReward(stakeReward).receiveRewards(token, interestPaid.div(4));
         borrowTokenBalance[token] += interestPaid.mul(3).div(4);
+        compound();
     }
 
     function repayAll(address token) external {
@@ -184,6 +201,25 @@ contract collateralizeGLP {
                 tokenDebt[token] -= amount;
             }
         }
+    }
+
+    function compound() internal {
+        uint wethBefore = IERC20(weth).balanceOf(address(this));
+        rewardsRouter.handleRewards(
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false
+        );
+        totalCollateral += rewardsRouter.mintAndStakeGlp(
+            weth,
+            IERC20(weth).balanceOf(address(this)).sub(wethBefore),
+            1,
+            1
+        );
     }
 
 
