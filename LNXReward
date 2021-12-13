@@ -94,7 +94,7 @@ contract LNXRewards {
     function startRewards() external {
         require(msg.sender == governance && baseRate == 0);
         mintRewards();
-        baseRate = 1e18;
+        baseRate = 1e16; // 0.01 LNX per second
     }
 
     function setProtocol(address _protocol) external {
