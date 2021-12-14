@@ -27,7 +27,7 @@ interface IVault {
     function allWhitelistedTokens(uint) external view returns (address);
 }
 
-contract LNXRewards {
+contract StakeRewards {
 
     using SafeMath for uint;
 

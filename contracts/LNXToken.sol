@@ -17,9 +17,13 @@ contract LNXToken is Context, IERC20, IERC20Metadata {
     string private _name = "LNX Token";
     string private _symbol = "LNX";
 
-    constructor(address _rewards) {
-        rewards = _rewards;
+    constructor() {
         _mint(msg.sender, 100000e18);
+    }
+
+    function setRewards(address _rewards) external {
+        require(rewards == address(0));
+        rewards = _rewards;
     }
 
     function name() public view virtual override returns (string memory) {

@@ -1,25 +1,40 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
 
-  // We get the contract to deploy
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  // Deploy LNX token
+  const LNXToken = await hre.ethers.getContractFactory("LNXToken");
+  const lnxtoken = await LNXToken.deploy();
 
-  await greeter.deployed();
+  await lnxtoken.deployed();
 
-  console.log("Greeter deployed to:", greeter.address);
+  // Deploy LNX rewards contract
+  const LNXRewards = await hre.ethers.getContractFactory("LNXRewards");
+  const lnxrewards = await LNXRewards.deploy(lnxtoken.address);
+
+  await lnxrewards.deployed();
+
+  // Deploy staking rewards contract
+  const StakeRewards = await hre.ethers.getContractFactory("StakeRewards");
+  const stakerewards = await StakeRewards.deploy(
+    lnxtoken.address,
+    "0x4277f8F2c384827B5273592FF7CeBd9f2C1ac258"
+  );
+
+  // Deploy lending protocol
+  const Protocol = await hre.ethers.getContractFactory("Protocol");
+  const protocol = await Protocol.deploy(
+    "0x489ee077994B6658eAfA855C308275EAd8097C4A",
+    "0xaBBc5F99639c9B6bCb58544ddf04EFA6802F4064",
+    "0x4277f8F2c384827B5273592FF7CeBd9f2C1ac258",
+    "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+    lnxrewards.address,
+    stakerewards.address
+  );
+
+  await protocol.deployed();
+
+  console.log("Protocol deployed to:", protocol.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

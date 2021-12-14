@@ -49,7 +49,7 @@ interface IStakeReward {
     function receiveRewards(address token, uint amount) external;
 }
 
-contract collateralizeGLP {
+contract Protocol {
 
     using SafeMath for uint;
 
