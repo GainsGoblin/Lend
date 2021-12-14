@@ -4,6 +4,9 @@ require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
+require("@nomiclabs/hardhat-ethers");
+require("hardhat-deploy-ethers");
+require('hardhat-deploy');
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -27,7 +30,7 @@ module.exports = {
     hardhat: {
       mining: {
         auto: false,
-        interval: 5000
+        interval: 500
       }
     },
   },
