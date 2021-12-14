@@ -16,9 +16,10 @@ contract ShareToken is Context, IERC20, IERC20Metadata {
     string private _name;
     string private _symbol;
 
-    constructor(string memory name_, string memory symbol_) {
+    constructor(string memory name_, string memory symbol_, address _protocol) {
         _name = name_;
         _symbol = symbol_;
+        protocol = _protocol;
     }
 
     function name() public view virtual override returns (string memory) {

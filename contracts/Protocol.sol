@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 interface IERC20 {
     function totalSupply() external view returns (uint256);
@@ -25,6 +24,10 @@ interface IERC20 {
 interface IVault {
     function allWhitelistedTokensLength() external view returns (uint256);
     function allWhitelistedTokens(uint) external view returns (address);
+}
+
+interface IPriceFeed {
+    function getPrice(address, bool, bool, bool) external view returns (uint256);
 }
 
 interface IRewardsRouter {
@@ -54,7 +57,6 @@ contract Protocol {
     using SafeMath for uint;
 
     mapping(address => bool) public borrowToken; // Token allowed to be deposited/borrowed
-    mapping(address => address) public priceFeed; // Price feed for token
     mapping(address => address) public borrowShare; // Share token from lent token
     mapping(address => uint) public borrowTokenBalance; // Tracks balance of lent tokens
 
@@ -74,8 +76,9 @@ contract Protocol {
     uint public ltv = 50; // 50 is 50% GLP LTV
     address public lnxReward;
     address public stakeReward;
+    IPriceFeed public priceFeed;
 
-    constructor(address _vault, address _rewardsRouter, address _GLP, address _weth, address _lnxReward, address _stakeReward) {
+    constructor(address _vault, address _rewardsRouter, address _GLP, address _weth, address _lnxReward, address _stakeReward, address _priceFeed) {
         governance = msg.sender;
         rewardsRouter = IRewardsRouter(_rewardsRouter);
         vault = IVault(_vault);
@@ -83,6 +86,7 @@ contract Protocol {
         weth = _weth;
         lnxReward = _lnxReward;
         stakeReward = _stakeReward;
+        priceFeed = IPriceFeed(_priceFeed);
     }
 
 
@@ -231,11 +235,10 @@ contract Protocol {
         governance = _governance;
     }
 
-    function setBorrowToken(address token, address share, address _priceFeed) external {
+    function setBorrowToken(address token, address share) external {
         require(msg.sender == governance, "!Governance");
         require(borrowShare[token] == address(0), "!Governance");
         borrowShare[token] = share;
-        priceFeed[token] = _priceFeed;
         borrowToken[token] = true;
         decimalMultiplier[token] = uint(18).sub(IERC20(token).decimals());
     }
@@ -243,11 +246,6 @@ contract Protocol {
     function setBorrowTokenAllowed(address token, bool allowed) external {
         require(msg.sender == governance, "!Governance");
         borrowToken[token] = allowed;
-    }
-
-    function setPriceFeed(address token, address feed) external {
-        require(msg.sender == governance, "!Governance");
-        priceFeed[token] = feed;
     }
 
     function setltv(uint _ltv) external {
@@ -294,15 +292,10 @@ contract Protocol {
         return totalCollateral.mul(1e18).div(IERC20(GLPShare).totalSupply());
     }
 
-    // Fetch the price of an asset from Chainlink oracle
+    // Fetch the price of an asset from GMX price feed contract
     function getLatestPrice(address token) private view returns (uint) {
-        (
-            ,
-            int price,
-            ,
-            ,
-        ) = AggregatorV3Interface(priceFeed[token]).latestRoundData();
-        return uint(price).mul(1e10); // Normalize to 1e18
+        uint price = priceFeed.getPrice(token, false, true, false);
+        return price.div(1e12); // Normalize to 1e18
     }
 
     // Price of GLP
