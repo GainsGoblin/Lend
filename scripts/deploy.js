@@ -7,12 +7,14 @@ async function main() {
   const lnxtoken = await LNXToken.deploy();
 
   await lnxtoken.deployed();
+  console.log("LNXToken deployed to:", lnxtoken.address);
 
   // Deploy LNX rewards contract
   const LNXRewards = await hre.ethers.getContractFactory("LNXRewards");
   const lnxrewards = await LNXRewards.deploy(lnxtoken.address);
 
   await lnxrewards.deployed();
+  console.log("LNXRewards deployed to:", lnxrewards.address);
 
   // Deploy staking rewards contract
   const StakeRewards = await hre.ethers.getContractFactory("StakeRewards");
@@ -20,6 +22,7 @@ async function main() {
     lnxtoken.address,
     "0x4277f8F2c384827B5273592FF7CeBd9f2C1ac258"
   );
+  console.log("StakeRewards deployed to:", stakerewards.address);
 
   // Deploy lending protocol
   const Protocol = await hre.ethers.getContractFactory("Protocol");
@@ -33,7 +36,6 @@ async function main() {
   );
 
   await protocol.deployed();
-
   console.log("Protocol deployed to:", protocol.address);
 }
 
