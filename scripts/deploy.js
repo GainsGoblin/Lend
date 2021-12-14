@@ -22,6 +22,8 @@ async function main() {
     lnxtoken.address,
     "0x4277f8F2c384827B5273592FF7CeBd9f2C1ac258"
   );
+
+  await stakerewards.deployed();
   console.log("StakeRewards deployed to:", stakerewards.address);
 
   // Deploy lending protocol
