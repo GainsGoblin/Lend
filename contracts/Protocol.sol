@@ -254,12 +254,19 @@ contract Protocol {
         ltv = _ltv;
     }
 
+    function setGLPShare(address _GLPShare) external {
+        require(msg.sender == governance, "!Governance");
+        require(address(GLPShare) == address(0), "GLP Share already set!");
+        GLPShare = IERC20(_GLPShare);
+    }
+
 
 
     // View functions
 
     // Value of a debt "token"
     function debtValue(address token) public view returns (uint256) { // 1e18 precision
+        if (totalBorrowedAmount(token) == 0) return 1e18;
         return (tokenDebt[token].add(getTokenAccruedInterest(token))).mul(1e18).div(totalBorrowedAmount(token));
     }
 
@@ -302,7 +309,7 @@ contract Protocol {
     function getCollateralPrice() public view returns (uint) { // 1e18 precision
         uint totalValue;
         for (uint i=0; i<vault.allWhitelistedTokensLength(); i++) {
-            totalValue += getLatestPrice(vault.allWhitelistedTokens(i)).mul(IERC20(vault.allWhitelistedTokens(i)).balanceOf(address(vault)));
+            totalValue += getLatestPrice(vault.allWhitelistedTokens(i)).mul(IERC20(vault.allWhitelistedTokens(i)).balanceOf(address(vault)).mul(10**(decimalMultiplier[vault.allWhitelistedTokens(i)])));
         }
         uint price = totalValue.mul(1e18).div(IERC20(GLP).totalSupply());
         return uint(price);

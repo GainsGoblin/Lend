@@ -8429,6 +8429,13 @@
   dependencies:
     "asap" "~2.0.6"
 
+"prompt-sync@^4.2.0":
+  "integrity" "sha512-BuEzzc5zptP5LsgV5MZETjDaKSWfchl5U9Luiu8SKp7iZWD5tZalOxvNcZRwv+d2phNFr8xlbxmFNcRKfJOzJw=="
+  "resolved" "https://registry.npmjs.org/prompt-sync/-/prompt-sync-4.2.0.tgz"
+  "version" "4.2.0"
+  dependencies:
+    "strip-ansi" "^5.0.0"
+
 "proxy-addr@~2.0.5":
   "integrity" "sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg=="
   "resolved" "https://registry.npmjs.org/proxy-addr/-/proxy-addr-2.0.7.tgz"

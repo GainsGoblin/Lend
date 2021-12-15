@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/erikteesalu/Desktop/Solidity/Lend/contracts/LNXRewards.sol": {
-      "lastModificationDate": 1639489064110,
-      "contentHash": "710c99971ae0182d4883fa2e4ba4fdca",
+      "lastModificationDate": 1639588353667,
+      "contentHash": "5b1a7ad6df266340dce4dca5a6c9dd9e",
       "sourceName": "contracts/LNXRewards.sol",
       "solcConfig": {
         "version": "0.8.10",
@@ -136,8 +136,8 @@
       ]
     },
     "/Users/erikteesalu/Desktop/Solidity/Lend/contracts/Protocol.sol": {
-      "lastModificationDate": 1639499895408,
-      "contentHash": "ddb88c9cbb4a6fe0e670a5b0f2660fd3",
+      "lastModificationDate": 1639594798818,
+      "contentHash": "c04e82f6a60632f1c32cd67d977a7157",
       "sourceName": "contracts/Protocol.sol",
       "solcConfig": {
         "version": "0.8.10",
@@ -483,8 +483,8 @@
       ]
     },
     "/Users/erikteesalu/Desktop/Solidity/Lend/contracts/Interfaces/IERC20.sol": {
-      "lastModificationDate": 1639512911487,
-      "contentHash": "dfa48842a385078f91adf7201b33f503",
+      "lastModificationDate": 1639593661493,
+      "contentHash": "3ebd9c2e64b299a5ae6f42e6a6441876",
       "sourceName": "contracts/Interfaces/IERC20.sol",
       "solcConfig": {
         "version": "0.8.10",

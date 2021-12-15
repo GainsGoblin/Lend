@@ -104,7 +104,7 @@ contract LNXRewards {
 
     function mintRewards() internal returns (uint256) {
         uint amountToMint = 0;
-        if (baseRate.mul(lnx.totalSupply()).div(lnx.capSupply()) <= 1e18) {
+        if (baseRate.mul(lnx.totalSupply()).div(lnx.capSupply()) <= 1e16) {
             uint rate = baseRate.sub(baseRate.mul(lnx.totalSupply()).div(lnx.capSupply()));
             amountToMint = (block.timestamp.sub(mintCheckpoint)).mul(rate);    
         }
@@ -123,6 +123,7 @@ contract LNXRewards {
     }
 
     function claimableRewards(address account) public view returns (uint) {
+        if (baseRate == 0) return 0;
         uint mintable = (block.timestamp.sub(mintCheckpoint)).div(baseRate.mul(lnx.capSupply()).div(lnx.totalSupply().mul(10000)));
         uint rewards = lnx.totalSupply().add(mintable);
         uint accountRewards = (rewards.sub(userClaimed[account])).mul(protocol.accountLentValue(account)).div(protocol.totalLentValue());

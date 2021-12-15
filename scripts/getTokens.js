@@ -1,5 +1,6 @@
 const hre = require("hardhat");
 const { deployments, ethers } = hre;
+const { execute } = deployments;
 const { parseEther } = ethers.utils;
 const ether = parseEther;
 

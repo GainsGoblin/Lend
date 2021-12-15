@@ -34,6 +34,11 @@ module.exports = {
       }
     },
   },
+  namedAccounts: {
+    deployer: {
+      default: 0,
+    }
+  },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",
@@ -41,4 +46,7 @@ module.exports = {
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
+  mocha: {
+    timeout: 0
+  }
 };
