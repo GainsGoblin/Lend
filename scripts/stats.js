@@ -15,6 +15,7 @@ async function main() {
   const protocol = await hre.ethers.getContractAt("Protocol", Protocol.address);
 
   const tokenInput = await prompt("Token address to get stats for: ");
+  const userInput = await prompt("User address to get stats for: ");
   const token = await hre.ethers.getContractAt("contracts/Interfaces/IERC20.sol:IERC20", tokenInput);
   const tokenName = await token.symbol();
 
@@ -41,6 +42,24 @@ async function main() {
 
   const totalBorrowedAmount = await protocol.totalBorrowedAmount(tokenInput);
   console.log(tokenName, "total borrowed amount:", totalBorrowedAmount.toString());
+
+  const accountHealth = await protocol.accountHealth(userInput);
+  console.log("Account health:", accountHealth.toString());
+
+  const accountBorrowedValue = await protocol.accountBorrowedValue(userInput);
+  console.log("Account borrowed value:", accountBorrowedValue.toString());
+
+  const accountLentValue = await protocol.accountLentValue(userInput);
+  console.log("Account lent value:", accountLentValue.toString());
+
+  const accountCollateralValue = await protocol.accountCollateralValue(userInput);
+  console.log("Account collateral value:", accountCollateralValue.toString());
+
+  const borrowingPower = await protocol.borrowingPower(userInput, tokenInput);
+  console.log("Account borrowing power in", tokenName, "", borrowingPower.toString());
+
+  const borrowingPowerUSD = await protocol.borrowingPowerUSD(userInput);
+  console.log("Account borrowing power in USD:", borrowingPowerUSD.toString());
 }
 
 main().catch((error) => {

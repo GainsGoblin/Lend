@@ -338,9 +338,9 @@ contract Protocol {
             address token = vault.allWhitelistedTokens(i);
             accountValue += borrowTokenBalance[token]
             .mul(IERC20(borrowShare[token]).balanceOf(account))
+            .mul(getShareValue(token))
             .mul(getLatestPrice(token))
-            .div(IERC20(borrowShare[token]).totalSupply())
-            .div(1e18);
+            .div(1e36);
         }  
         return accountValue;      
     }
@@ -375,11 +375,11 @@ contract Protocol {
 
     // How many tokens can an user borrow
     function borrowingPower(address account, address token) public view returns (uint256) {
-        return accountBorrowedValue(account).mul(accountHealth(account)).div(getLatestPrice(token));
+        return (accountCollateralValue(account).sub(accountBorrowedValue(account))).mul(1e18).div(getLatestPrice(token));
     }
 
     // How much can an user borrow in USD
     function borrowingPowerUSD(address account) public view returns (uint256) {
-        return accountBorrowedValue(account).mul(accountHealth(account)).div(1e18);
+        return accountCollateralValue(account).sub(accountBorrowedValue(account));
     }
 }

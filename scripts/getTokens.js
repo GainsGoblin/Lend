@@ -22,8 +22,8 @@ async function main() {
   await weth.deposit({value: ether("9")});
   console.log("Deposited 9 ETH -> 9 WETH");
 
-  await weth.approve(router.address, ether("1000"));
-  console.log("Approved the spending of 1000 WETH for Router");
+  await weth.approve(router.address, ether("100"));
+  console.log("Approved the spending of 100 WETH for Router");
 
   await router.swap(
     [weth.address, dai.address],
