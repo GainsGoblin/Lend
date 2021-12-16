@@ -136,8 +136,8 @@
       ]
     },
     "/Users/erikteesalu/Desktop/Solidity/Lend/contracts/Protocol.sol": {
-      "lastModificationDate": 1639672386486,
-      "contentHash": "0e3d9dd19c2dec7ac8fd6a8f21888c7d",
+      "lastModificationDate": 1639675418977,
+      "contentHash": "235fe9ce5b847f0d765d249ace981c96",
       "sourceName": "contracts/Protocol.sol",
       "solcConfig": {
         "version": "0.8.10",
@@ -177,6 +177,7 @@
       ],
       "artifacts": [
         "IERC20",
+        "IGLPManager",
         "ILNXReward",
         "IPriceFeed",
         "IRewardsRouter",

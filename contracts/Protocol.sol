@@ -52,6 +52,10 @@ interface IStakeReward {
     function receiveRewards(address token, uint amount) external;
 }
 
+interface IGLPManager {
+    function getAumInUsdg(bool) external view returns (uint256);
+}
+
 contract Protocol {
 
     using SafeMath for uint;
@@ -319,12 +323,7 @@ contract Protocol {
 
     // Price of GLP
     function getCollateralPrice() public view returns (uint) { // 1e18 precision
-        uint totalValue;
-        for (uint i=0; i<vault.allWhitelistedTokensLength(); i++) {
-            totalValue += getLatestPrice(vault.allWhitelistedTokens(i)).mul(IERC20(vault.allWhitelistedTokens(i)).balanceOf(address(vault)).mul(10**(decimalMultiplier[vault.allWhitelistedTokens(i)])));
-        }
-        uint price = totalValue.mul(1e18).div(IERC20(GLP).totalSupply());
-        return uint(price);
+        return IGLPManager(GLPManager).getAumInUsdg(true).mul(1e18).div(IERC20(GLP).totalSupply());
     }
 
     // User's health factor
@@ -352,7 +351,7 @@ contract Protocol {
             .mul(IERC20(borrowShare[token]).balanceOf(account))
             .mul(getShareValue(token))
             .mul(getLatestPrice(token))
-            .div(1e36);
+            .div(1e54);
         }  
         return accountValue;      
     }
@@ -371,7 +370,7 @@ contract Protocol {
 
     // Value of an user's collateral in USD
     function accountCollateralValue(address account) public view returns (uint256) { // 1e18 precision
-        uint totalCollateralValue = IERC20(GLPShare).balanceOf(account).mul(getCollateralShareValue()).mul(getCollateralPrice()).mul(ltv).div(100);
+        uint totalCollateralValue = IERC20(GLPShare).balanceOf(account).mul(getCollateralShareValue()).mul(getCollateralPrice()).mul(ltv).div(1e36).div(100);
         return totalCollateralValue;    
     }
 
