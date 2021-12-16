@@ -10,7 +10,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         log: true,
         args: [
             "0x489ee077994B6658eAfA855C308275EAd8097C4A", // Vault
-            "0xaBBc5F99639c9B6bCb58544ddf04EFA6802F4064", // RewardsRouter
+            "0xA906F338CB21815cBc4Bc87ace9e68c87eF8d8F1", // RewardsRouterV2
             "0x4277f8F2c384827B5273592FF7CeBd9f2C1ac258", // GLP
             "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", // WETH
             lnxrewards.address,

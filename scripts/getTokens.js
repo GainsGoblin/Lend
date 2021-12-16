@@ -6,7 +6,9 @@ const ether = parseEther;
 
 async function main() {
 
-  const [owner] = await ethers.getSigners();
+  const {
+    deployer
+  } = await getNamedAccounts();
 
   const router = await hre.ethers.getContractAt("Router", "0xaBBc5F99639c9B6bCb58544ddf04EFA6802F4064");
   const dai = await hre.ethers.getContractAt("contracts/Interfaces/IERC20.sol:IERC20", "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1");
@@ -29,72 +31,72 @@ async function main() {
     [weth.address, dai.address],
     ether("1"),
     1,
-    owner.address
+    deployer
   );
-  let daibalance = await dai.balanceOf(owner.address);
+  let daibalance = await dai.balanceOf(deployer);
   console.log("Swapped 1 WETH for", daibalance.toString(), "DAI");
 
   await router.swap(
     [weth.address, usdc.address],
     ether("1"),
     1,
-    owner.address
+    deployer
   );
-  let usdcbalance = await usdc.balanceOf(owner.address);
+  let usdcbalance = await usdc.balanceOf(deployer);
   console.log("Swapped 1 WETH for", usdcbalance.toString(), "USDC");
 
   await router.swap(
     [weth.address, usdt.address],
     ether("1"),
     1,
-    owner.address
+    deployer
   );
-  let usdtbalance = await usdt.balanceOf(owner.address);
+  let usdtbalance = await usdt.balanceOf(deployer);
   console.log("Swapped 1 WETH for", usdtbalance.toString(), "USDT");
 
   await router.swap(
     [weth.address, mim.address],
     ether("1"),
     1,
-    owner.address
+    deployer
   );
-  let mimbalance = await mim.balanceOf(owner.address);
+  let mimbalance = await mim.balanceOf(deployer);
   console.log("Swapped 1 WETH for", mimbalance.toString(), "MIM");
 
   await router.swap(
     [weth.address, frax.address],
     ether("1"),
     1,
-    owner.address
+    deployer
   );
-  let fraxbalance = await frax.balanceOf(owner.address);
+  let fraxbalance = await frax.balanceOf(deployer);
   console.log("Swapped 1 WETH for", fraxbalance.toString(), "FRAX");
 
   await router.swap(
     [weth.address, wbtc.address],
     ether("1"),
     1,
-    owner.address
+    deployer
   );
-  let wbtcbalance = await wbtc.balanceOf(owner.address);
+  let wbtcbalance = await wbtc.balanceOf(deployer);
   console.log("Swapped 1 WETH for", wbtcbalance.toString(), "WBTC");
 
   await router.swap(
     [weth.address, uni.address],
     ether("1"),
     1,
-    owner.address
+    deployer
   );
-  let unibalance = await uni.balanceOf(owner.address);
+  let unibalance = await uni.balanceOf(deployer);
   console.log("Swapped 1 WETH for", unibalance.toString(), "UNI");
 
   await router.swap(
     [weth.address, link.address],
     ether("1"),
     1,
-    owner.address
+    deployer
   );
-  let linkbalance = await link.balanceOf(owner.address);
+  let linkbalance = await link.balanceOf(deployer);
   console.log("Swapped 1 WETH for", linkbalance.toString(), "LINK");
 }
 

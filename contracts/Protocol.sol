@@ -95,7 +95,7 @@ contract Protocol {
 
     // If the user has fsGLP, it should be redeemed beforehand through a tx on frontend
     function depositCollateral(address token, uint256 amount) external {
-        compound();
+        if (totalCollateral > 0) compound();
         IERC20(token).transferFrom(msg.sender, address(this), amount);
         amount = rewardsRouter.mintAndStakeGlp(token, amount, 1, 1);
         uint amountToMint = amount.mul(1e18).div(getCollateralShareValue());
@@ -241,6 +241,7 @@ contract Protocol {
         borrowShare[token] = share;
         borrowToken[token] = true;
         decimalMultiplier[token] = uint(18).sub(IERC20(token).decimals());
+        IERC20(token).approve(address(rewardsRouter), type(uint).max);
     }
 
     function setBorrowTokenAllowed(address token, bool allowed) external {
