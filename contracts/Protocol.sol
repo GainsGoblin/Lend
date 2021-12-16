@@ -77,16 +77,27 @@ contract Protocol {
     address public lnxReward;
     address public stakeReward;
     IPriceFeed public priceFeed;
+    address public GLPManager;
 
-    constructor(address _vault, address _rewardsRouter, address _GLP, address _weth, address _lnxReward, address _stakeReward, address _priceFeed) {
+    constructor(
+        address _vault,
+        address _rewardsRouter,
+        address _GLP,
+        address _weth,
+        address _lnxReward,
+        address _stakeReward,
+        address _priceFeed,
+        address _GLPManager
+    ) {
         governance = msg.sender;
-        rewardsRouter = IRewardsRouter(_rewardsRouter);
         vault = IVault(_vault);
+        rewardsRouter = IRewardsRouter(_rewardsRouter);
         GLP = IERC20(_GLP);
         weth = _weth;
         lnxReward = _lnxReward;
         stakeReward = _stakeReward;
         priceFeed = IPriceFeed(_priceFeed);
+        GLPManager = _GLPManager;
     }
 
 
@@ -241,7 +252,7 @@ contract Protocol {
         borrowShare[token] = share;
         borrowToken[token] = true;
         decimalMultiplier[token] = uint(18).sub(IERC20(token).decimals());
-        IERC20(token).approve(address(vault), type(uint).max);
+        IERC20(token).approve(GLPManager, type(uint).max);
     }
 
     function setBorrowTokenAllowed(address token, bool allowed) external {
