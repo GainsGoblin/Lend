@@ -97,7 +97,7 @@ contract Protocol {
     function depositCollateral(address token, uint256 amount) external {
         if (totalCollateral > 0) compound();
         IERC20(token).transferFrom(msg.sender, address(this), amount);
-        amount = rewardsRouter.mintAndStakeGlp(token, amount, 1, 1);
+        amount = rewardsRouter.mintAndStakeGlp(token, amount, 0, 1);
         uint amountToMint = amount.mul(1e18).div(getCollateralShareValue());
         IERC20(GLPShare).mint(msg.sender, amountToMint);
         totalCollateral += amount;
