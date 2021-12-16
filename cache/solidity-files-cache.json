@@ -136,8 +136,8 @@
       ]
     },
     "/Users/erikteesalu/Desktop/Solidity/Lend/contracts/Protocol.sol": {
-      "lastModificationDate": 1639616125540,
-      "contentHash": "20b99da88b18d77fa58c11c19b49c4b0",
+      "lastModificationDate": 1639617179501,
+      "contentHash": "65e06819cf06c0550e8eead8d6422ad4",
       "sourceName": "contracts/Protocol.sol",
       "solcConfig": {
         "version": "0.8.10",

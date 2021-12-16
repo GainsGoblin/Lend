@@ -241,7 +241,7 @@ contract Protocol {
         borrowShare[token] = share;
         borrowToken[token] = true;
         decimalMultiplier[token] = uint(18).sub(IERC20(token).decimals());
-        IERC20(token).approve(address(rewardsRouter), type(uint).max);
+        IERC20(token).approve(address(vault), type(uint).max);
     }
 
     function setBorrowTokenAllowed(address token, bool allowed) external {
