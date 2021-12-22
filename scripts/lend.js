@@ -5,15 +5,20 @@ const { parseEther } = ethers.utils;
 const ether = parseEther;
 const { deploy, execute } = deployments;
 
-async function main() {
 
-  const tokenInput = await prompt("Token address to lend: ");
+
+async function main() {
 
   const {
     deployer
   } = await getNamedAccounts();
-  const token = await hre.ethers.getContractAt("IWETH9", tokenInput);
+
+  const weth = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
+  //let tokenInput = prompt("Token address to lend: ");
+  //if(tokenInput == "weth") { tokenInput == weth }
+
   const protocol = await deployments.get("Protocol");
+  const token = await hre.ethers.getContractAt("IWETH9", weth);
 
   await token.approve(protocol.address, ether("100"));
   const tokenName = await token.name();

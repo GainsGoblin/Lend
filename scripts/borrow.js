@@ -7,12 +7,13 @@ const { deploy, execute } = deployments;
 
 async function main() {
 
-  const tokenInput = await prompt("Token address to borrow: ");
+  const weth = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
+  //const tokenInput = await prompt("Token address to borrow: ");
 
   const {
     deployer
   } = await getNamedAccounts();
-  const token = await hre.ethers.getContractAt("IWETH9", tokenInput);
+  const token = await hre.ethers.getContractAt("IWETH9", weth);
   const protocol = await deployments.get("Protocol");
 
   const tokenName = await token.name();
@@ -22,9 +23,9 @@ async function main() {
     {from: deployer, log: true},
     "borrow",
     token.address,
-    ether("0.1")
+    ether("0.05755")
   );
-  console.log("Successfully borrowed 0.1", tokenName);
+  console.log("Successfully borrowed", tokenName);
 }
 
 main().catch((error) => {

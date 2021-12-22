@@ -41,7 +41,7 @@ interface IProtocol {
     // How many collateral tokens is it's share token backed by
     function getCollateralShareValue() external view returns (uint256);
 
-    // Fetch the price of an asset from Chainlink oracle
+    // Fetch the price of an asset from oracle
     function getLatestPrice(address token) external view returns (uint);
 
     // Price of GLP
@@ -81,7 +81,7 @@ contract LNXRewards {
 
     IERC20 public lnx; // Governance token
     uint256 public mintCheckpoint;
-    uint256 public baseRate; // Xe18 Tokens per second
+    uint256 public baseRate; // Wei per second
     IProtocol public protocol; // Lending protocol
     address public governance;
     mapping(address => uint) public userClaimed; // How many tokens has an user claimed
@@ -114,7 +114,7 @@ contract LNXRewards {
     }
 
     function claimRewards(address account) external {
-        require(msg.sender == account || msg.sender == address(protocol), "Cannot claim for another account");
+        require(msg.sender == account || msg.sender == address(protocol) || msg.sender == address(lnx), "Cannot claim for another account");
         mintRewards();
         if (claimableRewards(account) == 0) userClaimed[account] = lnx.totalSupply();    
         uint rewards = claimableRewards(account);
@@ -124,7 +124,7 @@ contract LNXRewards {
 
     function claimableRewards(address account) public view returns (uint) {
         if (baseRate == 0) return 0;
-        uint mintable = (block.timestamp.sub(mintCheckpoint)).div(baseRate.mul(lnx.capSupply()).div(lnx.totalSupply().mul(10000)));
+        uint mintable = (block.timestamp.sub(mintCheckpoint)).mul(baseRate.mul(lnx.capSupply()).div(lnx.totalSupply().mul(10000)));
         uint rewards = lnx.totalSupply().add(mintable);
         uint accountRewards = (rewards.sub(userClaimed[account])).mul(protocol.accountLentValue(account)).div(protocol.totalLentValue());
         return accountRewards;

@@ -7,29 +7,20 @@ const { deploy, execute } = deployments;
 
 async function main() {
 
-  const tokenInput = await prompt("Token address to deposit into GLP: ");
-
   const {
     deployer
   } = await getNamedAccounts();
-  const token = await hre.ethers.getContractAt("IWETH9", tokenInput);
-  // const protocol = await deployments.get("Protocol");
   const Protocol = await deployments.get("Protocol");
   const protocol = await hre.ethers.getContractAt("Protocol", Protocol.address);
+  const WGLP = await deployments.get("ShareToken");
+  const wglp = await hre.ethers.getContractAt("ShareToken", WGLP.address);
 
-  await token.approve(protocol.address, ether("100"));
-  const tokenName = await token.name();
-  console.log("Approved the spending of 100", tokenName, "for Protocol");
 
-  await protocol.depositCollateral(token.address, ether("1"));
-  // await execute(
-  //   "Protocol",
-  //   {from: deployer, log: true},
-  //   "depositCollateral",
-  //   token.address,
-  //   ether("1")
-  // );
-  console.log("Successfully collateralized 1", tokenName, "as GLP");
+  await wglp.approve(protocol.address, ether("10000"));
+  console.log("Approved the spending of WGLP for Protocol");
+
+  await protocol.depositCollateral(ether("1000"));
+  console.log("Successfully collateralized WGLP");
 }
 
 main().catch((error) => {

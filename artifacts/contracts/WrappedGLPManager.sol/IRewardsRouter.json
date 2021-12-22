@@ -1,0 +1,122 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IRewardsRouter",
+  "sourceName": "contracts/WrappedGLPManager.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "_shouldClaimGmx",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "_shouldStakeGmx",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "_shouldClaimEsGmx",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "_shouldStakeEsGmx",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "_shouldStakeMultiplierPoints",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "_shouldClaimWeth",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "_shouldConvertWethToEth",
+          "type": "bool"
+        }
+      ],
+      "name": "handleRewards",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minUsdg",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minGlp",
+          "type": "uint256"
+        }
+      ],
+      "name": "mintAndStakeGlp",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_tokenOut",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_glpAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minOut",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_receiver",
+          "type": "address"
+        }
+      ],
+      "name": "unstakeAndRedeemGlp",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

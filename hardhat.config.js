@@ -26,12 +26,17 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  */
 module.exports = {
   solidity: "0.8.10",
+  defaultNetwork: "hardhat",
   networks: {
     hardhat: {
+      chainId: 42161,
+      forking: {
+        url: "https://arb-mainnet.g.alchemy.com/v2/RsblMJD5kSOphpB7kscQRL5oadiXkR-h"
+      },
       mining: {
         auto: false,
-        interval: 500
-      }
+        interval: 100
+      },
     },
   },
   namedAccounts: {

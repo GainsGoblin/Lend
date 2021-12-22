@@ -33,6 +33,7 @@ contract StakeRewards {
 
     IERC20 public lnx; // Governance token
     address public protocol; // Lending protocol
+    address public WGLP;
     IVault public vault;
     address public governance;
     mapping(address => uint) public userStaked; // How much LNX has an user staked
@@ -44,6 +45,11 @@ contract StakeRewards {
         lnx = IERC20(_lnx);
         governance = msg.sender;
         vault= IVault(_vault);
+    }
+
+    function setWGLP(address _WGLP) external {
+        require(msg.sender == governance);
+        WGLP = _WGLP;
     }
 
     function setProtocol(address _protocol) external {
@@ -77,6 +83,15 @@ contract StakeRewards {
         for(uint i=0; i<vault.allWhitelistedTokensLength(); i++) {
             token = vault.allWhitelistedTokens(i);
             if (claimableRewards(account, token) == 0) userClaimed[account][token] = tokensRewarded[token];
+            else {
+                rewards = claimableRewards(account, token);
+                IERC20(token).transfer(account, rewards);
+                userClaimed[account][token] = tokensRewarded[token];
+            }
+        }
+        token = WGLP;
+        if (claimableRewards(account, token) == 0) userClaimed[account][token] = tokensRewarded[token];
+        else{
             rewards = claimableRewards(account, token);
             IERC20(token).transfer(account, rewards);
             userClaimed[account][token] = tokensRewarded[token];

@@ -27,77 +27,69 @@ async function main() {
   await weth.approve(router.address, ether("100"));
   console.log("Approved the spending of 100 WETH for Router");
 
-  await router.swap(
-    [weth.address, dai.address],
-    ether("1"),
-    1,
-    deployer
-  );
-  let daibalance = await dai.balanceOf(deployer);
-  console.log("Swapped 1 WETH for", daibalance.toString(), "DAI");
+  // await router.swap(
+  //   [weth.address, dai.address],
+  //   ether("1"),
+  //   1,
+  //   deployer
+  // );
+  // console.log("Swapped 1 WETH for DAI");
 
-  await router.swap(
-    [weth.address, usdc.address],
-    ether("1"),
-    1,
-    deployer
-  );
-  let usdcbalance = await usdc.balanceOf(deployer);
-  console.log("Swapped 1 WETH for", usdcbalance.toString(), "USDC");
+  // await router.swap(
+  //   [weth.address, usdc.address],
+  //   ether("1"),
+  //   1,
+  //   deployer
+  // );
+  // console.log("Swapped 1 WETH for USDC");
 
-  await router.swap(
-    [weth.address, usdt.address],
-    ether("1"),
-    1,
-    deployer
-  );
-  let usdtbalance = await usdt.balanceOf(deployer);
-  console.log("Swapped 1 WETH for", usdtbalance.toString(), "USDT");
+  // await router.swap(
+  //   [weth.address, usdt.address],
+  //   ether("1"),
+  //   1,
+  //   deployer
+  // );
+  // console.log("Swapped 1 WETH for USDT");
 
-  await router.swap(
-    [weth.address, mim.address],
-    ether("1"),
-    1,
-    deployer
-  );
-  let mimbalance = await mim.balanceOf(deployer);
-  console.log("Swapped 1 WETH for", mimbalance.toString(), "MIM");
+  // await router.swap(
+  //   [weth.address, mim.address],
+  //   ether("1"),
+  //   1,
+  //   deployer
+  // );
+  // console.log("Swapped 1 WETH for MIM");
 
-  await router.swap(
-    [weth.address, frax.address],
-    ether("1"),
-    1,
-    deployer
-  );
-  let fraxbalance = await frax.balanceOf(deployer);
-  console.log("Swapped 1 WETH for", fraxbalance.toString(), "FRAX");
+  // await router.swap(
+  //   [weth.address, frax.address],
+  //   ether("1"),
+  //   1,
+  //   deployer
+  // );
+  // console.log("Swapped 1 WETH for FRAX");
 
-  await router.swap(
-    [weth.address, wbtc.address],
-    ether("1"),
-    1,
-    deployer
-  );
-  let wbtcbalance = await wbtc.balanceOf(deployer);
-  console.log("Swapped 1 WETH for", wbtcbalance.toString(), "WBTC");
+  // await router.swap(
+  //   [weth.address, wbtc.address],
+  //   ether("1"),
+  //   1,
+  //   deployer
+  // );
+  // console.log("Swapped 1 WETH for WBTC");
 
-  await router.swap(
-    [weth.address, uni.address],
-    ether("1"),
-    1,
-    deployer
-  );
-  let unibalance = await uni.balanceOf(deployer);
-  console.log("Swapped 1 WETH for", unibalance.toString(), "UNI");
+  // await router.swap(
+  //   [weth.address, uni.address],
+  //   ether("1"),
+  //   1,
+  //   deployer
+  // );
+  // console.log("Swapped 1 WETH for UNI");
 
-  await router.swap(
-    [weth.address, link.address],
-    ether("1"),
-    1,
-    deployer
-  );
-  let linkbalance = await link.balanceOf(deployer);
-  console.log("Swapped 1 WETH for", linkbalance.toString(), "LINK");
+  // await router.swap(
+  //   [weth.address, link.address],
+  //   ether("1"),
+  //   1,
+  //   deployer
+  // );
+  // console.log("Swapped 1 WETH for LINK");
 }
 
 // We recommend this pattern to be able to use async/await everywhere

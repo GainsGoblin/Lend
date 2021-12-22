@@ -14,10 +14,16 @@ async function main() {
   const Protocol = await deployments.get("Protocol");
   const protocol = await hre.ethers.getContractAt("Protocol", Protocol.address);
 
+  const LNXRewards = await deployments.get("LNXRewards");
+  const lnxrewards = await hre.ethers.getContractAt("LNXRewards", LNXRewards.address);
+
   const tokenInput = await prompt("Token address to get stats for: ");
   const userInput = await prompt("User address to get stats for: ");
   const token = await hre.ethers.getContractAt("contracts/Interfaces/IERC20.sol:IERC20", tokenInput);
   const tokenName = await token.symbol();
+
+  const userDebtUSD = await protocol.userDebtUSD(userInput, tokenInput);
+  console.log("userDebtUSD:", userDebtUSD.toString());
 
   const debtvalue = await protocol.debtValue(tokenInput);
   console.log(tokenName, "debt value:", debtvalue.toString());
@@ -49,6 +55,9 @@ async function main() {
   const accountBorrowedValue = await protocol.accountBorrowedValue(userInput);
   console.log("Account borrowed value:", accountBorrowedValue.toString());
 
+  const userDebt = await protocol.userDebt(userInput, tokenInput);
+  console.log("Account debt amount in", tokenName, ":", userDebt.toString());
+
   const accountLentValue = await protocol.accountLentValue(userInput);
   console.log("Account lent value:", accountLentValue.toString());
 
@@ -56,10 +65,23 @@ async function main() {
   console.log("Account collateral value:", accountCollateralValue.toString());
 
   const borrowingPower = await protocol.borrowingPower(userInput, tokenInput);
-  console.log("Account borrowing power in", tokenName, "", borrowingPower.toString());
+  console.log("Account borrowing power in", tokenName, ":", borrowingPower.toString());
 
   const borrowingPowerUSD = await protocol.borrowingPowerUSD(userInput);
   console.log("Account borrowing power in USD:", borrowingPowerUSD.toString());
+
+  const tokenDebt = await protocol.tokenDebt(tokenInput);
+  console.log("Token debt:", tokenDebt.toString());
+
+  const borrowedAmount = await protocol.borrowedAmount(deployer, tokenInput);
+  console.log("borrowedAmount:", borrowedAmount.toString());
+
+  const claimableLNXrewards = await lnxrewards.claimableRewards(userInput);
+  console.log("Claimable LNX rewards:", claimableLNXrewards.toString());
+
+  const baserate = await lnxrewards.baseRate();
+  console.log("LNX reward base rate:", baserate.toString());
+
 }
 
 main().catch((error) => {
