@@ -29,10 +29,6 @@ module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      chainId: 42161,
-      forking: {
-        url: "https://arb-mainnet.g.alchemy.com/v2/RsblMJD5kSOphpB7kscQRL5oadiXkR-h"
-      },
       mining: {
         auto: false,
         interval: 100
