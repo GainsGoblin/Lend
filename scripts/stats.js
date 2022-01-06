@@ -17,8 +17,8 @@ async function main() {
   const LNXRewards = await deployments.get("LNXRewards");
   const lnxrewards = await hre.ethers.getContractAt("LNXRewards", LNXRewards.address);
 
-  const tokenInput = await prompt("Token address to get stats for: ");
-  const userInput = await prompt("User address to get stats for: ");
+  const tokenInput = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"//await prompt("Token address to get stats for: ");
+  const userInput = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"//await prompt("User address to get stats for: ");
   const token = await hre.ethers.getContractAt("contracts/Interfaces/IERC20.sol:IERC20", tokenInput);
   const tokenName = await token.symbol();
 

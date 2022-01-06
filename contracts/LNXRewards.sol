@@ -115,16 +115,16 @@ contract LNXRewards {
 
     function claimRewards(address account) external {
         require(msg.sender == account || msg.sender == address(protocol) || msg.sender == address(lnx), "Cannot claim for another account");
-        mintRewards();
         if (claimableRewards(account) == 0) userClaimed[account] = lnx.totalSupply();    
         uint rewards = claimableRewards(account);
+        mintRewards();
         lnx.transfer(account, rewards);
         userClaimed[account] = lnx.totalSupply();
     }
 
     function claimableRewards(address account) public view returns (uint) {
         if (baseRate == 0) return 0;
-        uint mintable = (block.timestamp.sub(mintCheckpoint)).mul(baseRate.mul(lnx.capSupply()).div(lnx.totalSupply().mul(10000)));
+        uint mintable = (block.timestamp.sub(mintCheckpoint)).mul(baseRate.sub(baseRate.mul(lnx.totalSupply()).div(lnx.capSupply())));
         uint rewards = lnx.totalSupply().add(mintable);
         uint accountRewards = (rewards.sub(userClaimed[account])).mul(protocol.accountLentValue(account)).div(protocol.totalLentValue());
         return accountRewards;

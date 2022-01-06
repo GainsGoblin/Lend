@@ -15,12 +15,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             wrappedglpmanager.address
         ]
     });
-    await execute(
-        'Protocol',
-        { from: deployer, log: true },
-        'setWGLP',
-        wglp.address,
-    );
+
 
     await execute(
         'StakeRewards',
@@ -34,6 +29,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         { from: deployer, log: true },
         'setWGLPManager',
         wrappedglpmanager.address,
+    );
+
+    await execute(
+        'Protocol',
+        { from: deployer, log: true },
+        'setWGLP',
+        wglp.address,
     );
 
     await execute(

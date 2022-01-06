@@ -14,7 +14,8 @@ async function main() {
     deployer
   } = await getNamedAccounts();
   const token = await hre.ethers.getContractAt("IWETH9", weth);
-  const protocol = await deployments.get("Protocol");
+  const Protocol = await deployments.get("Protocol");
+  const protocol = await hre.ethers.getContractAt("Protocol", Protocol.address);
 
   const tokenName = await token.name();
 
@@ -23,7 +24,8 @@ async function main() {
     {from: deployer, log: true},
     "borrow",
     token.address,
-    ether("0.05755")
+    ether("0.11745")
+    //await protocol.borrowingPower(deployer, token.address)
   );
   console.log("Successfully borrowed", tokenName);
 }

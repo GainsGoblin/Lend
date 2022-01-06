@@ -25,15 +25,30 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: "0.8.10",
-  defaultNetwork: "hardhat",
+  solidity: {
+    version: "0.8.10",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 1000,
+      }
+    }
+  },
   networks: {
+    localhost: {
+      url: 'http://127.0.0.1:8545',
+      timeout: 2000000,
+    },
     hardhat: {
       mining: {
         auto: false,
         interval: 100
       },
-    },
+      forking: {
+        url: 'https://arb-mainnet.g.alchemy.com/v2/RsblMJD5kSOphpB7kscQRL5oadiXkR-h'
+      },
+      timeout: 2000000
+    }
   },
   namedAccounts: {
     deployer: {
@@ -48,6 +63,6 @@ module.exports = {
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
   mocha: {
-    timeout: 0
+    timeout: 2000000
   }
 };

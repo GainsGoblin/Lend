@@ -9,8 +9,8 @@
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -51,8 +51,8 @@
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -93,8 +93,8 @@
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -128,15 +128,15 @@
       ]
     },
     "/Users/erikteesalu/Desktop/Solidity/Lend/contracts/LNXRewards.sol": {
-      "lastModificationDate": 1640179725292,
-      "contentHash": "9b61fb290be7c16a8a4ac9ec7ec7f229",
+      "lastModificationDate": 1640462716301,
+      "contentHash": "47193346f5a6acb82b206dfd45868fc3",
       "sourceName": "contracts/LNXRewards.sol",
       "solcConfig": {
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -181,8 +181,8 @@
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -216,15 +216,15 @@
       ]
     },
     "/Users/erikteesalu/Desktop/Solidity/Lend/contracts/WrappedGLPManager.sol": {
-      "lastModificationDate": 1640111586922,
+      "lastModificationDate": 1640453749136,
       "contentHash": "b95576b8ce5a10679b7e2c342aa60a6d",
       "sourceName": "contracts/WrappedGLPManager.sol",
       "solcConfig": {
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -266,15 +266,15 @@
       ]
     },
     "/Users/erikteesalu/Desktop/Solidity/Lend/contracts/StakeRewards.sol": {
-      "lastModificationDate": 1640124121734,
+      "lastModificationDate": 1640462360328,
       "contentHash": "6f29bd11cd729e8a4f843be6f900cd30",
       "sourceName": "contracts/StakeRewards.sol",
       "solcConfig": {
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -312,15 +312,15 @@
       ]
     },
     "/Users/erikteesalu/Desktop/Solidity/Lend/contracts/Protocol.sol": {
-      "lastModificationDate": 1640176738189,
-      "contentHash": "33a6fe7dea9854f57b05bfa835099c96",
+      "lastModificationDate": 1640468835615,
+      "contentHash": "69792df07bf79b6a63afe5fd14a74d8a",
       "sourceName": "contracts/Protocol.sol",
       "solcConfig": {
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -371,8 +371,8 @@
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -417,8 +417,8 @@
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -459,8 +459,8 @@
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -503,8 +503,8 @@
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -538,15 +538,15 @@
       ]
     },
     "/Users/erikteesalu/Desktop/Solidity/Lend/contracts/ShareToken.sol": {
-      "lastModificationDate": 1640085245835,
+      "lastModificationDate": 1640106216734,
       "contentHash": "fb7acb90c87cb1b9641fafd323ba3a95",
       "sourceName": "contracts/ShareToken.sol",
       "solcConfig": {
         "version": "0.8.10",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {

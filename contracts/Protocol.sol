@@ -74,7 +74,8 @@ contract Protocol {
 
     mapping(address => uint) public decimalMultiplier; // Decimals needed to normalize to 1e18
     mapping(address => uint) public tokenDebt; // Tracks amount of tokens owed
-    mapping(address => mapping(address => uint)) public borrowedAmount; // User debt
+    mapping(address => mapping(address => uint)) public borrowedAmount; // User debt shares
+    mapping(address => mapping(address => uint)) public initialBorrowedAmount; // User initial borrowed amount
     mapping(address => uint) public interestCheckpoint; // Tracks token accrued interest using time
 
     uint256 public totalCollateral; // Total WGLP deposited
@@ -125,6 +126,7 @@ contract Protocol {
     function depositCollateral(uint256 amount) external {
         WGLP.transferFrom(msg.sender, address(this), amount);
         userCollateral[msg.sender] += amount;
+        totalCollateral += amount;
     }
 
     function withdrawCollateralAll() external {
@@ -173,6 +175,7 @@ contract Protocol {
         tokenDebt[token] += getTokenAccruedInterest(token);
         interestCheckpoint[token] = block.timestamp;
         borrowedAmount[msg.sender][token] += tokenAmount.mul(uint(1e18).mul(10**decimalMultiplier[token])).div(debtValue(token));
+        initialBorrowedAmount[msg.sender][token] += tokenAmount.mul(10**decimalMultiplier[token]);
         initialLentAmount[token] += tokenAmount.mul(10**decimalMultiplier[token]);
         tokenDebt[token] += tokenAmount.mul(10**decimalMultiplier[token]); 
         IERC20(token).transfer(msg.sender, tokenAmount);
@@ -180,7 +183,7 @@ contract Protocol {
 
     function repay(address token, uint256 tokenAmount) public {
         tokenAmount = tokenAmount.mul(10**decimalMultiplier[token]);
-        uint interest = userDebt(msg.sender, token).sub(borrowedAmount[token][msg.sender]);
+        uint interest = userDebt(msg.sender, token).sub(initialBorrowedAmount[msg.sender][token]);
         uint interestPaid;
         if (tokenAmount >= interest) {
             interestPaid = interest;
@@ -191,12 +194,13 @@ contract Protocol {
         require(tokenAmount <= userDebt(msg.sender, token), "Repaying too much");
         tokenDebt[token] += getTokenAccruedInterest(token);
         interestCheckpoint[token] = block.timestamp;
-        borrowedAmount[msg.sender][token] -= tokenAmount.sub(interestPaid);
+        borrowedAmount[msg.sender][token] -= tokenAmount.mul(1e18).div(debtValue(token));
+        initialBorrowedAmount[msg.sender][token] -= tokenAmount.sub(interestPaid);
         initialLentAmount[token] -= tokenAmount.sub(interestPaid);
         tokenDebt[token] -= tokenAmount;
         IERC20(token).transferFrom(msg.sender, address(this), tokenAmount.div(10**decimalMultiplier[token]));
         IStakeReward(stakeReward).receiveRewards(token, interestPaid.div(4).div(10**decimalMultiplier[token]));
-        borrowTokenBalance[token] += interestPaid.mul(3).div(4).div(10**decimalMultiplier[token]);
+        borrowTokenBalance[token] += interestPaid.mul(3).div(4);
     }
 
     function repayAll(address token) external {
@@ -206,29 +210,42 @@ contract Protocol {
     function liquidate(address account) external {
         require(accountHealth(account) < 1e18, "Account healthy");
         uint256 amount = userCollateral[account];
-        totalPendingLiquidationWGLP += amount.mul(9).div(10);
         userCollateral[account] = 0;
-        totalCollateral -= amount;
+        totalPendingLiquidationWGLP = totalPendingLiquidationWGLP.add(amount.mul(9).div(10));
+        totalCollateral = totalCollateral.sub(amount);
         WGLP.transfer(msg.sender, amount.mul(5).div(100));
         IStakeReward(stakeReward).receiveRewards(address(WGLP), amount.mul(5).div(100));
         address token;
+        uint tokenDebtAmountUSD;
         uint tokenDebtAmount;
         uint allWhitelistedTokensLength = vault.allWhitelistedTokensLength();
+        uint amountWithdrawn;
         for(uint i=0; i<allWhitelistedTokensLength; i++) {
             token = vault.allWhitelistedTokens(i);
-            tokenDebtAmount = userDebtUSD(account, token);
-            if(tokenDebtAmount > 0) {
-                tokenPendingLiquidationUSD[token] += tokenDebtAmount;
-                totalPendingLiquidationUSD += tokenDebtAmount;
+            tokenDebt[token] = tokenDebt[token].add(getTokenAccruedInterest(token));
+            interestCheckpoint[token] = block.timestamp;
+            tokenDebtAmountUSD = userDebtUSD(account, token);
+            tokenDebtAmount = userDebt(account, token);
+            if(tokenDebtAmountUSD > 0) {
+                tokenDebt[token] = tokenDebt[token].sub(tokenDebtAmount);
+                initialLentAmount[token] = initialLentAmount[token].sub(tokenDebtAmount);
+                borrowedAmount[account][token] = 0;
+                initialBorrowedAmount[account][token] = 0;
+                tokenPendingLiquidationUSD[token] = tokenPendingLiquidationUSD[token].add(tokenDebtAmountUSD);
+                totalPendingLiquidationUSD = totalPendingLiquidationUSD.add(tokenDebtAmountUSD);
             }
         }
         if(WGLPManager.canWithdraw() == true) {
             for(uint j=0; j<allWhitelistedTokensLength; j++) {
                 token = vault.allWhitelistedTokens(j);
                 if(tokenPendingLiquidationUSD[token] > 0) {
-                    WGLPManager.withdraw(token, totalPendingLiquidationWGLP.mul(tokenPendingLiquidationUSD[token]).div(totalPendingLiquidationUSD));
+                    amountWithdrawn = WGLPManager.withdraw(token, totalPendingLiquidationWGLP.mul(tokenPendingLiquidationUSD[token]).div(totalPendingLiquidationUSD));
+                    borrowTokenBalance[token] = borrowTokenBalance[token].add(amountWithdrawn.mul(10**decimalMultiplier[token]));
+                    tokenPendingLiquidationUSD[token] = 0;
                 }
             }
+            totalPendingLiquidationUSD = 0;
+            totalPendingLiquidationWGLP = 0;
         }
     }
 
@@ -266,6 +283,8 @@ contract Protocol {
         require(msg.sender == governance, "!Governance");
         require(address(WGLP) == address(0), "WGLP already set!");
         WGLP = IERC20(_WGLP);
+        WGLP.approve(stakeReward, type(uint).max);
+        WGLP.approve(address(WGLPManager), type(uint).max);
     }
 
     function setWGLPManager(address _WGLPManager) external {
@@ -292,10 +311,15 @@ contract Protocol {
         return (tokenDebt[token].add(getTokenAccruedInterest(token))).mul(1e18).div(totalBorrowedAmount(token));
     }
 
+    // Tokens owed in total
+    function totalTokenDebt(address token) public view returns (uint256) { // 1e18 precision
+        return tokenDebt[token].add(getTokenAccruedInterest(token));
+    }
+
     // Interest on token since last checkpoint
     function getTokenAccruedInterest(address token) public view returns (uint256) { // 1e18 precision
         uint secondsBorrowed = block.timestamp.sub(interestCheckpoint[token]);
-        uint interest = tokenDebt[token].mul(secondsBorrowed).div(31536000); // 31536000 seconds in a year
+        uint interest = tokenDebt[token].mul(interestRate(token)).mul(secondsBorrowed).div(1e18).div(31536000); // 31536000 seconds in a year
         return interest;
     }
 
